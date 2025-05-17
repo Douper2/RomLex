@@ -80,3 +80,35 @@ def getwordofday(word=None):
         return "The word of the day cannot be found for some reason."
 
     return wordofday
+
+def getsynonym(word):
+    word = word.strip().lower()
+    url = "https://dexonline.ro/definitie/" + str(word)
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        return f"Error: {response.status_code}"
+
+    soup = BeautifulSoup(response.text, features="html5lib")
+    span = soup.find_all("span", {"class": "badge-relation badge-relation-1"}) # finds the synonym
+    synonyms = [span.get_text(strip=True) for span in span]
+    if not synonyms:
+        return "The synonym cannot be found. Check for typos"
+
+    return synonyms
+
+def getantonym(word):
+    word = word.strip().lower()
+    url = "https://dexonline.ro/definitie/" + str(word)
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        return f"Error: {response.status_code}"
+
+    soup = BeautifulSoup(response.text, features="html5lib")
+    span = soup.find_all("span", {"class": "badge-relation badge-relation-2"}) # finds the antonym
+    antonym = [span.get_text(strip=True) for span in span]
+    if not antonym:
+        return "The synonym cannot be found. Check for typos"
+
+    return antonym
