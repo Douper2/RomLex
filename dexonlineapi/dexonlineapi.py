@@ -112,3 +112,66 @@ def getantonym(word):
         return "The synonym cannot be found. Check for typos"
 
     return antonym
+
+def check_pos(word=None):
+    word = word.strip().lower()
+    url = "https://dexonline.ro/definitie/" + str(word)
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        return f"Error: {response.status_code}"
+
+    soup = BeautifulSoup(response.text, features="html5lib")
+    span = soup.find("span", {"class" : "tree-pos-info"})
+
+    if not span:
+        return "The part of speech cannot be found. Check for typos."
+
+    return span
+
+def derived_words(word=None):
+    word = word.strip().lower()
+    url = "https://ro.wiktionary.org/wiki/" + str(word)
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        return f"Error: {response.status_code}"
+
+    soup = BeautifulSoup(response.text, features="html5lib")
+    span = soup.find_all("ul", id="mwbA")
+
+    if not span:
+        return f"The words derived from '{word}' cannot be found. Maybe the parser needs some coffee."
+
+    derived = [a.text.strip()
+               for ul in span
+               for li in ul.find_all("li")
+               for a in li.find_all("a")]
+
+    if not derived:
+        return f"The words derived from '{word}' cannot be found."
+
+    return derived
+
+def getexpressions(exp=None): # "exp" means expression
+    phverbs = exp.strip().lower()
+    url = "https://ro.wiktionary.org/wiki/" + str(exp)
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        return f"Error: {response.status_code}"
+
+    soup = BeautifulSoup(response.text, features="html5lib")
+    span = soup.find_all("ul", id="mwiA")
+
+    if not span:
+        return f"The expressions with '{exp}' cannot be found."
+
+    expression = [a.text.strip()
+               for ul in span
+               for a in ul.find_all("li", id=lambda x: x and x.startswith("mw"))]
+
+    if not expression:
+        return f"The expressions with '{exp}' cannot be found."
+
+    return expression
