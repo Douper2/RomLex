@@ -154,7 +154,7 @@ def derived_words(word=None):
     return derived
 
 def getexpressions(exp=None): # "exp" means expression
-    phverbs = exp.strip().lower()
+    exp = exp.strip().lower()
     url = "https://ro.wiktionary.org/wiki/" + str(exp)
     response = requests.get(url)
 
