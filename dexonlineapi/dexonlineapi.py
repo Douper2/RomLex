@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import random
-
+import json
 
 # English: An API for the dexonline.ro website, a website for the DEX (The Romanian Explanatory Dictionary)
 # Romana: Un API pentru site-ul dexonline.ro
@@ -175,3 +175,33 @@ def getexpressions(exp=None): # "exp" means expression
         return f"The expressions with '{exp}' cannot be found."
 
     return expression
+
+def get_ipa(word):
+    word = word.strip().lower()
+    url = "https://ro.wiktionary.org/wiki/" + str(word)
+    response = requests.get(url)
+
+    if response.status_code != 200:
+        return f"Error: {response.status_code}"
+
+    soup = BeautifulSoup(response.text, features="html5lib")
+    span = soup.find("span", {"title" : "AFI"})
+
+    if span:
+        return span.text.strip()
+    else:
+        return f"The IPA pronunciation for {word} cannot be found."
+
+def infowordjson(word):
+    infoword = word.strip().lower()
+    entry = {
+        'word' : infoword,
+        'definition' : getdefinition(infoword),
+        'etymology' : getetymology(infoword),
+        'part of speech' : check_pos(infoword),
+        'synonyms' : getsynonym(infoword),
+        'antonyms' : getantonym(infoword),
+        'derived words' : derived_words(infoword),
+        'expressions' : getexpressions(infoword)
+    }
+    return json.dumps(entry, ensure_ascii=False, indent=4)
